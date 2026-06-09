@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://oghalejusticeisokoboy-ui.github.io/Pluto-Wallet-/sitemap.xml

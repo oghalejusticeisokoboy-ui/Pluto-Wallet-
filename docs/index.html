@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pluto Wallet — Secure Mobile & Web Wallet</title>
+  <meta name="description" content="Pluto Wallet — a secure wallet app (demo). Create an account, test with sandbox funds, and manage your balances. Do NOT use for real money until verified and compliant.">
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Pluto Wallet — Secure Mobile & Web Wallet">
+  <meta property="og:description" content="Pluto Wallet — a secure wallet app (demo). Create an account, test with sandbox funds, and manage your balances. Do NOT use for real money until verified and compliant.">
+  <meta property="og:url" content="https://oghalejusticeisokoboy-ui.github.io/Pluto-Wallet-/">
+  <meta property="og:image" content="/Pluto-Wallet-/assets/og-image.png">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="manifest" href="/Pluto-Wallet-/manifest.json">
+  <link rel="icon" href="/Pluto-Wallet-/assets/favicon.png">
+
+  <style>
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin: 0; color: #0b1220; background: #f6f9fc; }
+    header { background: linear-gradient(90deg,#0b4da2,#0a8bcc); color: white; padding: 32px 20px; }
+    .container { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    h1 { margin: 0 0 8px; font-size: 28px; }
+    p.lead { color: #e8f3ff; margin: 0 0 12px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 12px; margin-top: 16px; }
+    .card { background: white; border-radius: 8px; padding: 16px; box-shadow: 0 6px 20px rgba(11,18,32,0.06); }
+    footer { color: #445; padding: 24px 0; text-align: center; }
+    a.button { display:inline-block; background:#0a8bcc; color:white; padding:10px 14px; border-radius:8px; text-decoration:none; }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Pluto Wallet",
+    "url": "https://oghalejusticeisokoboy-ui.github.io/Pluto-Wallet-/",
+    "description": "Pluto Wallet — a secure wallet app (demo). Create an account and test with sandbox funds.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://oghalejusticeisokoboy-ui.github.io/Pluto-Wallet-/?s={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Pluto Wallet</h1>
+      <p class="lead">Secure wallet demo — web landing page, sandbox testing, and Play store instructions.</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>Install & Test</h2>
+      <p>Download the test app (APK/AAB) from the repository Actions artifacts or install from the Play Store when available.</p>
+      <p>
+        <a class="button" href="https://github.com/oghalejusticeisokoboy-ui/Pluto-Wallet-/actions">Download build artifacts</a>
+        <a class="button" style="background:#2d3748;margin-left:8px" href="https://github.com/oghalejusticeisokoboy-ui/Pluto-Wallet-/pull/1">View PR & CI</a>
+      </p>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <h2>About this demo</h2>
+      <p>This site is a public landing page and demonstration for the Pluto Wallet project. This demo supports sandbox testing only. Do not use this service for real funds until you add compliance, audits, and production keys.</p>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <h2>Documentation & Policies</h2>
+      <ul>
+        <li><a href="/Pluto-Wallet-/privacy.html">Privacy Policy</a></li>
+        <li><a href="/Pluto-Wallet-/terms.html">Terms of Service</a></li>
+        <li><a href="/Pluto-Wallet-/PLAY_STORE_RELEASE_NOTES.md">Play Store & Release notes</a></li>
+      </ul>
+    </section>
+
+    <section class="card" style="margin-top:12px">
+      <h2>Next steps to publish</h2>
+      <ol>
+        <li>Add Play service account & signing keystore as GitHub Secrets.</li>
+        <li>Run the Fastlane Play Store workflow to upload to the internal test track.</li>
+        <li>Add internal testers in Play Console and verify install.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">© Pluto Wallet — Demo. Contact: <a href="mailto:oghalejusticeisokoboy@gmail.com">oghalejusticeisokoboy@gmail.com</a></div>
+  </footer>
+</body>
+</html>
