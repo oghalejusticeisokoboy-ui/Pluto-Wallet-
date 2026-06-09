@@ -3,7 +3,12 @@ name: Auto request reviewers and add labels on PR
 on:
   pull_request:
     types: [opened, reopened, synchronize]
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'Pull request number (optional for manual runs)'
+        required: false
+        type: number
 
 permissions:
   contents: read
@@ -18,35 +23,72 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            // Configure reviewers, teams, and labels here
             const reviewers = ["oghalejusticeisokoboy-ui","frontend-dev","backend-dev","devops"];
             const team_reviewers = [];
             const labels = ["deploy","infra","ci","needs-review","chore"];
-            const prNumber = context.payload.pull_request ? context.payload.pull_request.number : undefined;
+
+            // Resolve PR number from event payload or manual input
+            let prNumber = undefined;
+            if (context.payload.pull_request && context.payload.pull_request.number) {
+              prNumber = context.payload.pull_request.number;
+            } else if (context.payload.inputs && context.payload.inputs.pr_number) {
+              prNumber = parseInt(context.payload.inputs.pr_number, 10);
+            }
 
             if (!prNumber) {
-              console.log('No pull request context detected. If running manually, please provide the PR number via workflow inputs or run from a PR run.');
+              console.log('No pull request context detected. When running manually, specify the PR number via the "pr_number" input.');
               return;
             }
 
-            // Request reviewers
-            if ((reviewers && reviewers.length) || (team_reviewers && team_reviewers.length)) {
+            // Validate reviewers: only keep users who are collaborators with permission to be requested
+            const validReviewers = [];
+            const invalidReviewers = [];
+
+            for (const r of reviewers) {
+              try {
+                // This call returns 204 if the user is a collaborator; it will throw if not
+                await github.rest.repos.checkCollaborator({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  username: r
+                });
+                validReviewers.push(r);
+              } catch (err) {
+                // If the check failed, record the reviewer as invalid (404) or log permission issues (403)
+                if (err.status === 404) {
+                  invalidReviewers.push({ reviewer: r, reason: 'not a collaborator' });
+                } else if (err.status === 403) {
+                  invalidReviewers.push({ reviewer: r, reason: 'permission denied checking collaborator (403)' });
+                } else {
+                  invalidReviewers.push({ reviewer: r, reason: `check failed: ${err.message}` });
+                }
+              }
+            }
+
+            if (invalidReviewers.length) {
+              console.log(`Some reviewers were not eligible and will be skipped: ${JSON.stringify(invalidReviewers)}`);
+            }
+
+            // Request reviewers using only valid usernames and configured teams
+            if ((validReviewers.length) || (team_reviewers.length)) {
               try {
                 await github.rest.pulls.requestReviewers({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   pull_number: prNumber,
-                  reviewers,
+                  reviewers: validReviewers,
                   team_reviewers
                 });
-                console.log(`Requested reviewers: ${JSON.stringify(reviewers)} ${team_reviewers.length ? `and teams: ${JSON.stringify(team_reviewers)}` : ''}`);
+                console.log(`Requested reviewers: ${JSON.stringify(validReviewers)} ${team_reviewers.length ? `and teams: ${JSON.stringify(team_reviewers)}` : ''}`);
               } catch (err) {
                 console.warn(`Failed to request reviewers: ${err.message}`);
               }
             } else {
-              console.log('No reviewers configured; skipping reviewer request.');
+              console.log('No valid reviewers to request; skipping reviewer request.');
             }
 
-            // Add labels
+            // Add labels to the PR (issues API)
             if (labels && labels.length) {
               try {
                 await github.rest.issues.addLabels({
