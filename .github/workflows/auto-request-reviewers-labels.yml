@@ -3,6 +3,7 @@ name: Auto request reviewers and add labels on PR
 on:
   pull_request:
     types: [opened, reopened, synchronize]
+  workflow_dispatch: {}
 
 permissions:
   contents: read
@@ -20,7 +21,12 @@ jobs:
             const reviewers = ["oghalejusticeisokoboy-ui","frontend-dev","backend-dev","devops"];
             const team_reviewers = [];
             const labels = ["deploy","infra","ci","needs-review","chore"];
-            const prNumber = context.payload.pull_request.number;
+            const prNumber = context.payload.pull_request ? context.payload.pull_request.number : undefined;
+
+            if (!prNumber) {
+              console.log('No pull request context detected. If running manually, please provide the PR number via workflow inputs or run from a PR run.');
+              return;
+            }
 
             // Request reviewers
             if ((reviewers && reviewers.length) || (team_reviewers && team_reviewers.length)) {
