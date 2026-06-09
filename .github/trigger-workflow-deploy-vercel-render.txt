@@ -1,0 +1,7 @@
+Trigger file to cause a no-op commit and run workflows
+
+This file was added to trigger GitHub Actions workflow runs on the deploy/vercel-render branch.
+
+Timestamp: 2026-06-09T18:43:36Z
+
+No other changes.
