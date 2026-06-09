@@ -1,0 +1,58 @@
+name: Auto request reviewers and add labels on PR
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  request-reviewers-and-labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Request reviewers and add labels
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const reviewers = ["oghalejusticeisokoboy-ui","frontend-dev","backend-dev","devops"];
+            const team_reviewers = [];
+            const labels = ["deploy","infra","ci","needs-review","chore"];
+            const prNumber = context.payload.pull_request.number;
+
+            // Request reviewers
+            if ((reviewers && reviewers.length) || (team_reviewers && team_reviewers.length)) {
+              try {
+                await github.rest.pulls.requestReviewers({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                  reviewers,
+                  team_reviewers
+                });
+                console.log(`Requested reviewers: ${JSON.stringify(reviewers)} ${team_reviewers.length ? `and teams: ${JSON.stringify(team_reviewers)}` : ''}`);
+              } catch (err) {
+                console.warn(`Failed to request reviewers: ${err.message}`);
+              }
+            } else {
+              console.log('No reviewers configured; skipping reviewer request.');
+            }
+
+            // Add labels
+            if (labels && labels.length) {
+              try {
+                await github.rest.issues.addLabels({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  labels
+                });
+                console.log(`Added labels: ${JSON.stringify(labels)}`);
+              } catch (err) {
+                console.warn(`Failed to add labels: ${err.message}`);
+              }
+            } else {
+              console.log('No labels configured; skipping label add.');
+            }
