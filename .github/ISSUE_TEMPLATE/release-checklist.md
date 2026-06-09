@@ -1,0 +1,8 @@
+- [ ] Have legal and compliance review for handling funds (KYC/AML as required)
+- [ ] Security review and code audit
+- [ ] Penetration test and vulnerability scan
+- [ ] Integrate sandbox payment/provider and test transactions
+- [ ] Configure Google Play internal testing and add testers
+- [ ] Verify app signing / keystore and add Play service account
+- [ ] Finalize privacy policy and terms
+- [ ] Monitor logs and set up crash reporting

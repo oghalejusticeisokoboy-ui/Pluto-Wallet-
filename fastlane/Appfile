@@ -1,0 +1,2 @@
+# Appfile (fastlane) — update package_name to match your app
+package_name("com.example.plutowallet")

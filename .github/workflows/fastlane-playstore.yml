@@ -1,0 +1,68 @@
+name: Fastlane Play Store Upload (requires secrets)
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play store track (internal, alpha, beta, production)'
+        required: false
+        default: 'internal'
+
+permissions:
+  contents: read
+
+jobs:
+  upload-to-play:
+    name: Build and Upload to Google Play (requires secrets)
+    runs-on: ubuntu-latest
+    env:
+      # Update PACKAGE_NAME in fastlane/Appfile or override here
+      PACKAGE_NAME: com.example.plutowallet
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.0
+
+      - name: Cache bundler gems
+        uses: actions/cache@v4
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ hashFiles('**/Gemfile.lock') }}
+
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle config set --local path 'vendor/bundle'
+          bundle install --jobs 4 --retry 3
+
+      - name: Prepare Play service account JSON
+        env:
+          SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$SERVICE_ACCOUNT_JSON" ]; then echo 'Missing PLAY_SERVICE_ACCOUNT_JSON secret'; exit 1; fi
+          echo "$SERVICE_ACCOUNT_JSON" > fastlane-service-account.json
+
+      - name: Decode Android keystore
+        env:
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_B64" ]; then echo 'Missing ANDROID_KEYSTORE_B64 secret'; exit 1; fi
+          echo "$ANDROID_KEYSTORE_B64" | base64 --decode > release.keystore
+
+      - name: Build release AAB
+        run: ./gradlew clean bundleRelease --no-daemon
+
+      - name: Upload to Play using fastlane
+        env:
+          JSON_KEY: fastlane-service-account.json
+          KEYSTORE_PATH: release.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          # fastlane lane: supply will upload the AAB; update package name in fastlane/Appfile or pass via environment
+          bundle exec fastlane android upload_to_play track:${{ github.event.inputs.track || 'internal' }}

@@ -1,0 +1,20 @@
+# fastlane configuration for Pluto Wallet (sample)
+
+default_platform(:android)
+
+platform :android do
+  desc 'Build AAB and upload to Google Play (internal by default)'
+  lane :upload_to_play do |options|
+    track = options[:track] || 'internal'
+
+    # Build the release AAB
+    gradle(task: 'bundle', build_type: 'Release')
+
+    # Upload using supply (reads FASTLANE_SERVICE_ACCOUNT_JSON or file path)
+    supply(
+      json_key: 'fastlane-service-account.json',
+      package_name: ENV['PACKAGE_NAME'] || 'com.example.plutowallet',
+      track: track
+    )
+  end
+end

@@ -1,0 +1,49 @@
+name: PR build comment
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  build-and-comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Run quick build (assembleDebug)
+        run: |
+          chmod +x ./gradlew || true
+          ./gradlew clean assembleDebug --no-daemon
+
+      - name: Upload debug APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+
+      - name: Comment on PR with artifact link and instructions
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const runId = context.runId;
+            const repo = context.repo;
+            const pr = context.payload.pull_request.number;
+            const artifactsUrl = `https://github.com/${repo.owner}/${repo.repo}/suites/${runId}/artifacts`;
+            const body = `Build finished for this PR. Download debug APK from the Actions run artifacts: ${artifactsUrl}\n\nIf you need an AAB or a release build, run the Fastlane Play Store workflow (requires secrets).`;
+            await github.rest.issues.createComment({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: pr,
+              body
+            });
