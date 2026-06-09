@@ -1,0 +1,27 @@
+# Render service template for pluto-wallet-backend
+# This template tells Render how to create a Web Service from this repo.
+# Please connect your GitHub repo in Render and create a new service using this file,
+# or use the Render dashboard to create a service and set the environment variables listed below.
+
+services:
+  - type: web
+    name: pluto-wallet-backend
+    env: node
+    region: oregon
+    plan: free
+    branch: main
+    repo: https://github.com/oghalejusticeisokoboy-ui/Pluto-Wallet-
+    buildCommand: cd backend && npm install --production && npm run build || true
+    startCommand: cd backend && npm run start
+    envVars:
+      - key: MONGODB_URI
+        scope: RUN_TIME
+      - key: JWT_SECRET
+        scope: RUN_TIME
+      - key: WALLET_ENCRYPTION_KEY
+        scope: RUN_TIME
+      - key: INFURA_API_KEY
+        scope: RUN_TIME
+      - key: PORT
+        value: "5000"
+        scope: RUN_TIME

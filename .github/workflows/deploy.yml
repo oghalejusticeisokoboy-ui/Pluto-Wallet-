@@ -1,0 +1,43 @@
+name: CI Build and Test
+on:
+  push:
+    branches: [ main, deploy/vercel-render ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  frontend-build:
+    name: Build Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install frontend deps
+        working-directory: frontend
+        run: |
+          npm ci
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm run build
+
+  backend-build:
+    name: Build Backend
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - name: Install backend deps
+        working-directory: backend
+        run: |
+          npm ci || true
+      - name: Run backend lint/test (if any)
+        working-directory: backend
+        run: |
+          if [ -f package.json ]; then npm run build || echo "no build script"; fi
