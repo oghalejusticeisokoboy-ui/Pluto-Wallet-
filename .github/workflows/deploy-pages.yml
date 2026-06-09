@@ -1,5 +1,3 @@
-# GitHub Pages deploy workflow for Pluto Wallet
-
 name: Deploy site to GitHub Pages
 
 on:
@@ -22,6 +20,15 @@ jobs:
         run: |
           mkdir -p public
           cp -R docs/* public/ || true
+
+      - name: Debug - list repo and docs files
+        run: |
+          echo "=== Listing repository root ==="
+          ls -la
+          echo "=== Listing docs directory ==="
+          ls -la docs || true
+          echo "=== Listing public directory ==="
+          ls -la public || true
 
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v1
