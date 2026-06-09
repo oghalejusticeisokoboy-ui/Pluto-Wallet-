@@ -23,10 +23,13 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            // Configure reviewers, teams, and labels here
-            const reviewers = ["oghalejusticeisokoboy-ui","frontend-dev","backend-dev","devops"];
-            const team_reviewers = [];
+            // Configure reviewers (individuals) and team_reviewers (team slugs within the org)
+            const reviewers = ["oghalejusticeisokoboy-ui"];
+            const team_reviewers = ["frontend-dev","backend-dev","devops"];
             const labels = ["deploy","infra","ci","needs-review","chore"];
+
+            // Organization slug used for logging; teams are team slugs within this org
+            const orgSlug = context.repo.owner;
 
             // Resolve PR number from event payload or manual input
             let prNumber = undefined;
@@ -41,13 +44,12 @@ jobs:
               return;
             }
 
-            // Validate reviewers: only keep users who are collaborators with permission to be requested
+            // Validate individual reviewers: only keep users who are collaborators with permission to be requested
             const validReviewers = [];
             const invalidReviewers = [];
 
             for (const r of reviewers) {
               try {
-                // This call returns 204 if the user is a collaborator; it will throw if not
                 await github.rest.repos.checkCollaborator({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -55,7 +57,6 @@ jobs:
                 });
                 validReviewers.push(r);
               } catch (err) {
-                // If the check failed, record the reviewer as invalid (404) or log permission issues (403)
                 if (err.status === 404) {
                   invalidReviewers.push({ reviewer: r, reason: 'not a collaborator' });
                 } else if (err.status === 403) {
@@ -67,7 +68,13 @@ jobs:
             }
 
             if (invalidReviewers.length) {
-              console.log(`Some reviewers were not eligible and will be skipped: ${JSON.stringify(invalidReviewers)}`);
+              console.log(`Some individual reviewers were not eligible and will be skipped: ${JSON.stringify(invalidReviewers)}`);
+            }
+
+            // Note: team_reviewers are team slugs within the org (org: ${orgSlug}).
+            // The REST API expects team slugs (not org/team strings) in the `team_reviewers` parameter.
+            if (team_reviewers.length) {
+              console.log(`Requesting teams (as team slugs) in org ${orgSlug}: ${JSON.stringify(team_reviewers)}`);
             }
 
             // Request reviewers using only valid usernames and configured teams
